@@ -1,0 +1,88 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getImage, Image } from 'astro:assets';
+import { render } from 'astro:content';
+import type { OgImage } from '../../components/SEO.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import TagLinks from '../../components/TagLinks.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedPosts, type Post } from '../../lib/posts';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const { title, description, pubDate, updatedDate, author, tags, heroImage, heroImageAlt, draft } =
+  post.data;
+const { Content } = await render(post);
+
+// Open Graph / Twitter image: 1200x630 JPG cropped from the hero. A smaller hero
+// is not upscaled; the box is scaled down to fit it, keeping the 1200:630 ratio.
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
+let ogImage: OgImage | undefined;
+if (heroImage) {
+  const scale = Math.min(1, heroImage.width / OG_WIDTH, heroImage.height / OG_HEIGHT);
+  const width = Math.round(OG_WIDTH * scale);
+  const height = Math.round(OG_HEIGHT * scale);
+  const result = await getImage({ src: heroImage, width, height, fit: 'cover', format: 'jpg' });
+  ogImage = {
+    src: result.src,
+    width: Number(result.attributes.width ?? width),
+    height: Number(result.attributes.height ?? height),
+    alt: heroImageAlt ?? '',
+  };
+}
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  image={ogImage}
+  article={{
+    publishedTime: pubDate,
+    modifiedTime: updatedDate,
+    author,
+    tags: tags.map((tag) => tag.label),
+  }}
+>
+  <article class="post">
+    <header class="post__header">
+      {draft && <p class="draft-badge">Draft — not published in production</p>}
+      <h1>{title}</h1>
+      <p class="post-meta">
+        <FormattedDate date={pubDate} /> · {author}
+        {
+          updatedDate && (
+            <>
+              {' '}
+              · Updated <FormattedDate date={updatedDate} />
+            </>
+          )
+        }
+      </p>
+      <TagLinks tags={tags} />
+    </header>
+    {
+      heroImage && (
+        <Image
+          class="post__hero"
+          src={heroImage}
+          alt={heroImageAlt ?? ''}
+          widths={[640, 960, 1280]}
+          sizes="(max-width: 760px) 100vw, 720px"
+          priority
+        />
+      )
+    }
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

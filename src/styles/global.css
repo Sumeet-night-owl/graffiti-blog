@@ -1,0 +1,280 @@
+/*
+ * The blog's only stylesheet. Deliberately neutral placeholder styling:
+ * brand colors, fonts, and logos will be added separately.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #1f1f1f;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+a {
+  color: #1f1f1f;
+  text-underline-offset: 0.15em;
+}
+
+a:hover {
+  color: #555555;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.container {
+  width: min(100% - 2rem, 45rem);
+  margin-inline: auto;
+}
+
+/* Header & footer */
+
+.site-header {
+  border-bottom: 1px solid #e5e5e5;
+  margin-bottom: 2.5rem;
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  padding-block: 1rem;
+}
+
+.site-title {
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav-list {
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer {
+  border-top: 1px solid #e5e5e5;
+  margin-top: 4rem;
+  padding-block: 1.5rem;
+  color: #666666;
+  font-size: 0.9375rem;
+}
+
+/* Headings & text */
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 2.25rem;
+  margin: 0 0 0.75rem;
+}
+
+.lede {
+  color: #555555;
+  margin-top: 0;
+}
+
+.post-meta {
+  color: #666666;
+  font-size: 0.9375rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+/* Post list */
+
+.post-list {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.post-card {
+  padding-block: 1.5rem;
+  border-top: 1px solid #e5e5e5;
+}
+
+.post-card__title {
+  font-size: 1.375rem;
+  margin: 0;
+}
+
+.post-card__title a {
+  text-decoration: none;
+}
+
+.post-card p {
+  margin: 0.25rem 0 0.75rem;
+}
+
+/* Tags */
+
+.tag-list,
+.tag-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-index {
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid #d4d4d4;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.tag-count {
+  color: #666666;
+  font-size: 0.875rem;
+}
+
+.draft-badge {
+  display: inline-block;
+  margin: 0 0 0.5rem 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  background: #f1f1f1;
+  color: #555555;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+p.draft-badge {
+  margin-left: 0;
+}
+
+/* Empty states */
+
+.empty-state {
+  margin-top: 2rem;
+  padding: 2rem;
+  border: 1px dashed #d4d4d4;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.empty-state h1,
+.empty-state h2 {
+  margin-top: 0;
+}
+
+/* Post */
+
+.post__header {
+  margin-bottom: 2rem;
+}
+
+.post__hero {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+}
+
+.prose h2 {
+  margin-top: 2.5rem;
+}
+
+.prose h3 {
+  margin-top: 2rem;
+}
+
+.prose img {
+  display: block;
+  margin: 1.5rem auto;
+  border-radius: 8px;
+}
+
+.prose blockquote {
+  margin: 1.5rem 0;
+  padding: 0.25rem 1.25rem;
+  border-left: 4px solid #d4d4d4;
+  color: #555555;
+}
+
+.prose table {
+  width: 100%;
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e5e5;
+  text-align: left;
+}
+
+.prose th {
+  background: #f7f7f7;
+}
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+.prose :not(pre) > code {
+  padding: 0.125rem 0.3rem;
+  border-radius: 4px;
+  background: #f1f1f1;
+}
+
+.prose pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.prose hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid #e5e5e5;
+}
