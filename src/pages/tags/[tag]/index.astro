@@ -1,0 +1,24 @@
+---
+import type { GetStaticPaths } from 'astro';
+import PostList from '../../../components/PostList.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getPublishedPosts, getTags, type TagSummary } from '../../../lib/posts';
+import { tagsIndexPath } from '../../../lib/urls';
+
+export const getStaticPaths = (async () => {
+  const tags = getTags(await getPublishedPosts());
+  return tags.map((tag) => ({ params: { tag: tag.slug }, props: { tag } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  tag: TagSummary;
+}
+
+const { tag } = Astro.props;
+---
+
+<BaseLayout title={`Posts tagged “${tag.label}”`} description={`Graffiti blog posts about ${tag.label}.`}>
+  <p><a href={tagsIndexPath()}>← All tags</a></p>
+  <h1>Posts tagged “{tag.label}”</h1>
+  <PostList posts={tag.posts} />
+</BaseLayout>

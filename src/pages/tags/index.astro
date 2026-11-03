@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedPosts, getTags } from '../../lib/posts';
+import { tagPath, withBase } from '../../lib/urls';
+
+const tags = getTags(await getPublishedPosts());
+---
+
+<BaseLayout title="Tags" description="Browse Graffiti blog posts by topic.">
+  <h1>Tags</h1>
+  {
+    tags.length > 0 ? (
+      <ul class="tag-index">
+        {tags.map((tag) => (
+          <li>
+            <a class="tag" href={tagPath(tag.slug)}>
+              {tag.label}
+            </a>{' '}
+            <span class="tag-count">
+              {tag.posts.length} {tag.posts.length === 1 ? 'post' : 'posts'}
+            </span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="empty-state">
+        <h2>No tags yet</h2>
+        <p>
+          Tags will appear here once posts are published. <a href={withBase()}>Back to the blog</a>.
+        </p>
+      </div>
+    )
+  }
+</BaseLayout>

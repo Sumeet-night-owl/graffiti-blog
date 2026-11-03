@@ -1,0 +1,52 @@
+---
+import SEO, { type Article, type OgImage } from '../components/SEO.astro';
+import { MAIN_SITE_URL, SITE_TITLE } from '../consts';
+import { tagsIndexPath, withBase } from '../lib/urls';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: OgImage;
+  article?: Article;
+  noindex?: boolean;
+}
+
+const props = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <SEO {...props} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="site-title" href={withBase()}>{SITE_TITLE}</a>
+        <nav aria-label="Main">
+          <ul class="nav-list">
+            <li><a href={withBase()}>Posts</a></li>
+            <li><a href={tagsIndexPath()}>Tags</a></li>
+            <li><a href={MAIN_SITE_URL}>Graffiti</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>
+          <a href={MAIN_SITE_URL}>mygraffiti.ai</a>{' '}
+          <span aria-hidden="true">·</span>{' '}
+          <a href={withBase('rss.xml')}>RSS</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

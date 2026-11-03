@@ -1,0 +1,26 @@
+---
+import PostList from '../components/PostList.astro';
+import { MAIN_SITE_URL, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title={SITE_TITLE} description={SITE_DESCRIPTION}>
+  <h1>{SITE_TITLE}</h1>
+  <p class="lede">{SITE_DESCRIPTION}</p>
+  {
+    posts.length > 0 ? (
+      <PostList posts={posts} />
+    ) : (
+      <div class="empty-state">
+        <h2>No posts yet</h2>
+        <p>
+          We haven't published anything here yet. Check back soon, or visit{' '}
+          <a href={MAIN_SITE_URL}>mygraffiti.ai</a> in the meantime.
+        </p>
+      </div>
+    )
+  }
+</BaseLayout>
