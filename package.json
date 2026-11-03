@@ -11,6 +11,9 @@
     "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
+    "check:posts": "node scripts/check-post-files.mjs",
+    "check:images": "node scripts/check-image-sizes.mjs",
+    "check:content": "npm run check:posts && npm run check:images",
     "check:links": "node scripts/check-links.mjs",
     "astro": "astro"
   },

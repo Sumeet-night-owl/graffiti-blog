@@ -27,7 +27,15 @@ It is a static site built with [Astro](https://astro.build/). Posts are Markdown
 | `npm run check`       | Type-check the project (`astro check`)                              |
 | `npm run build`       | Build the production site to `dist/` (drafts excluded)              |
 | `npm run preview`     | Serve the production build locally at http://localhost:4321/blog/   |
+| `npm run check:posts` | Check every post is at `src/content/posts/<slug>/index.md`          |
+| `npm run check:images`| Check every post image is 1 MB (1,000,000 bytes) or smaller         |
 | `npm run check:links` | Scan `dist/` for links that don't respect `/blog/` (after build)    |
+
+## Writing posts
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the writer workflow. Start new posts from [templates/post-template.md](templates/post-template.md).
+
+Pull requests into `main` run `.github/workflows/pr-checks.yml`. Its job, **Validate blog**, runs these steps in order: `npm ci`, post file check, image size check, `npm run check`, `npm run build`, and `npm run check:links`.
 
 ## Project structure
 
