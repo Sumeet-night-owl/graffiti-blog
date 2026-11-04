@@ -1,0 +1,167 @@
+# Builds the blog and deploys it to production with rsync over SSH.
+#
+# Manual only for now: Actions → Deploy → Run workflow (branch: main). Merging a
+# pull request does not deploy. Automatic deploys are enabled in a later task.
+#
+# Needs a GitHub environment named `production` with these secrets:
+#   DEPLOY_SSH_KEY      private key of the deploy user (no passphrase)
+#   DEPLOY_HOST         server hostname or IP
+#   DEPLOY_USER         SSH user that can write to DEPLOY_PATH
+#   DEPLOY_KNOWN_HOSTS  the server's host key line(s), e.g. from `ssh-keyscan -H <host>`
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time. A running deploy is never cancelled mid-sync; a newer
+# run waits for it (and replaces any older run that is still waiting).
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  # Runs every check and builds dist/. Has no environment and no deploy secrets,
+  # so npm packages never run alongside the SSH key.
+  build:
+    name: Build and check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js from .nvmrc
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Check post files and image sizes (npm run check:content)
+        run: npm run check:content
+
+      - name: Type check (npm run check)
+        run: npm run check
+
+      - name: Build site (npm run build)
+        run: npm run build
+
+      - name: Check links (npm run check:links)
+        run: npm run check:links
+
+      - name: Upload built site
+        uses: actions/upload-artifact@v7
+        with:
+          name: blog-dist
+          path: dist/
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    name: Deploy to production
+    needs: build
+    # Only deploy what is on main, even if the workflow is run from another branch.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: production
+      url: https://mygraffiti.ai/blog/
+    env:
+      # Fixed target. rsync --delete only ever acts inside this directory.
+      DEPLOY_PATH: /var/www/graffiti-blog/blog/
+    steps:
+      - name: Download built site
+        uses: actions/download-artifact@v8
+        with:
+          name: blog-dist
+          path: dist
+
+      - name: Verify build output
+        run: |
+          set -euo pipefail
+          # dist/ is the contents of /blog/: dist/index.html is served at /blog/.
+          for f in dist/index.html dist/404.html dist/rss.xml dist/sitemap-index.xml; do
+            if [ ! -f "$f" ]; then
+              echo "::error::$f is missing. Refusing to deploy an incomplete build (rsync --delete would remove live files)."
+              exit 1
+            fi
+          done
+          if [ ! -d dist/_astro ]; then
+            echo "::error::dist/_astro/ is missing. Refusing to deploy an incomplete build."
+            exit 1
+          fi
+          if [ -e dist/blog ]; then
+            echo "::error::dist/blog/ exists. The build is nested one level too deep and would be served at /blog/blog/."
+            exit 1
+          fi
+          if [ "$DEPLOY_PATH" != "/var/www/graffiti-blog/blog/" ]; then
+            echo "::error::Unexpected DEPLOY_PATH '$DEPLOY_PATH'."
+            exit 1
+          fi
+          echo "Build output OK: $(find dist -type f | wc -l) files."
+
+      - name: Check deploy secrets
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for name in DEPLOY_SSH_KEY DEPLOY_HOST DEPLOY_USER DEPLOY_KNOWN_HOSTS; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Secret $name is not set in the 'production' environment."
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - name: Set up SSH key and known_hosts
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          ssh_dir="$RUNNER_TEMP/deploy-ssh"
+          mkdir -p "$ssh_dir"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$ssh_dir/id_deploy"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_dir/known_hosts"
+          if ! ssh-keygen -y -P '' -f "$ssh_dir/id_deploy" > /dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid private key, or it has a passphrase."
+            exit 1
+          fi
+          # Host keys are always verified against this file; never StrictHostKeyChecking=no.
+          if ! ssh-keygen -F "$DEPLOY_HOST" -f "$ssh_dir/known_hosts" > /dev/null; then
+            echo "::error::DEPLOY_KNOWN_HOSTS has no entry for DEPLOY_HOST. Add the output of 'ssh-keyscan -H <host>' (verified against the server's real fingerprint)."
+            exit 1
+          fi
+
+      - name: Sync to /var/www/graffiti-blog/blog/ (rsync)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          ssh_dir="$RUNNER_TEMP/deploy-ssh"
+          # Trailing slash on dist/ copies its contents into DEPLOY_PATH (no extra
+          # nesting). --delete removes files in DEPLOY_PATH that are no longer in
+          # dist/, and nothing outside it.
+          rsync \
+            --archive --compress --human-readable --itemize-changes \
+            --delete --delete-delay --delay-updates \
+            --no-owner --no-group --chmod=D755,F644 \
+            -e "ssh -i $ssh_dir/id_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$ssh_dir/known_hosts" \
+            dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/deploy-ssh"
