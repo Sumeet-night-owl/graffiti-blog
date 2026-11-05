@@ -1,7 +1,7 @@
 # Builds the blog and deploys it to production with rsync over SSH.
 #
-# Manual only for now: Actions → Deploy → Run workflow (branch: main). Merging a
-# pull request does not deploy. Automatic deploys are enabled in a later task.
+# Runs automatically on every push to main (e.g. merging a pull request), and
+# can also be run manually: Actions → Deploy → Run workflow (branch: main).
 #
 # Needs a GitHub environment named `production` with these secrets:
 #   DEPLOY_SSH_KEY      private key of the deploy user (no passphrase)
@@ -12,6 +12,8 @@ name: Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
 
 permissions:
   contents: read
