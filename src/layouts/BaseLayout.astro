@@ -1,6 +1,15 @@
 ---
 import SEO, { type Article, type OgImage } from '../components/SEO.astro';
-import { MAIN_SITE_URL, SITE_TITLE } from '../consts';
+import GraffitiLogo from '../assets/graffiti-logo.svg';
+import {
+  CHROME_STORE_URL,
+  CONTACT_EMAIL,
+  MAIN_SITE_URL,
+  PRIVACY_URL,
+  SITE_TAGLINE,
+  SITE_TITLE,
+  TERMS_URL,
+} from '../consts';
 import { tagsIndexPath, withBase } from '../lib/urls';
 import '../styles/global.css';
 
@@ -21,31 +30,49 @@ const props = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#191919" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="apple-touch-icon" href={withBase('apple-touch-icon.png')} />
     <SEO {...props} />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      <div class="container site-header__inner">
-        <a class="site-title" href={withBase()}>{SITE_TITLE}</a>
+      <div class="shell site-header__inner">
+        <a class="logo" href={withBase()} aria-label={SITE_TITLE}>
+          <GraffitiLogo width={32} height={31} aria-hidden="true" />
+          <span>Graffiti</span>
+          <span class="logo__label">Blog</span>
+        </a>
         <nav aria-label="Main">
           <ul class="nav-list">
             <li><a href={withBase()}>Posts</a></li>
             <li><a href={tagsIndexPath()}>Tags</a></li>
-            <li><a href={MAIN_SITE_URL}>Graffiti</a></li>
+            <li class="nav-list__site"><a href={MAIN_SITE_URL}>mygraffiti.ai</a></li>
+            <li><a class="button" href={CHROME_STORE_URL}>Add to Chrome</a></li>
           </ul>
         </nav>
       </div>
     </header>
-    <main class="container">
+    <main id="main" class="container">
       <slot />
     </main>
     <footer class="site-footer">
-      <div class="container">
-        <p>
-          <a href={MAIN_SITE_URL}>mygraffiti.ai</a>{' '}
-          <span aria-hidden="true">·</span>{' '}
-          <a href={withBase('rss.xml')}>RSS</a>
-        </p>
+      <div class="shell site-footer__inner">
+        <div class="site-footer__brand">
+          <a class="logo logo--small" href={MAIN_SITE_URL}>
+            <GraffitiLogo width={32} height={31} aria-hidden="true" />
+            <span>Graffiti</span>
+          </a>
+          <p>{SITE_TAGLINE}</p>
+          <p><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+          <p class="site-footer__copy">© 2026 Graffiti. All rights reserved.</p>
+        </div>
+        <ul class="site-footer__links">
+          <li><a href={withBase('rss.xml')}>RSS</a></li>
+          <li><a href={PRIVACY_URL}>Privacy Policy</a></li>
+          <li><a href={TERMS_URL}>Terms of Service</a></li>
+        </ul>
       </div>
     </footer>
   </body>
