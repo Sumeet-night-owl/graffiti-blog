@@ -3,6 +3,12 @@ export const SITE_DESCRIPTION = 'News, guides, and product updates from the Graf
 
 /** The main Graffiti site. Links from the blog to it must use this absolute URL. */
 export const MAIN_SITE_URL = 'https://mygraffiti.ai/';
+export const PRIVACY_URL = 'https://mygraffiti.ai/privacy';
+export const TERMS_URL = 'https://mygraffiti.ai/terms';
+export const CHROME_STORE_URL =
+  'https://chromewebstore.google.com/detail/graffiti/pkebecmhcgfkgndfpnfghpmghbigaooi';
+export const CONTACT_EMAIL = 'hello@mygraffiti.ai';
+export const SITE_TAGLINE = 'Comments for teams and AI Agents';
 
 /** Post folders must be lowercase kebab-case, e.g. `my-first-post`. */
 export const POST_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
