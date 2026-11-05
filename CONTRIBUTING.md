@@ -16,6 +16,8 @@ Posts are published at **https://mygraffiti.ai/blog/**.
 
 A post is published when its PR is merged, as long as it has `draft: false`. If it has `draft: true`, it stays hidden even after merging. Use `draft: true` only when you want to merge a post now and publish it later.
 
+> **Drafts are not private.** This repository is public. Anyone can read every file on GitHub, including drafts, their images, and posts in open pull requests. `draft: true` only keeps a post off the website. Don't commit anything confidential or unannounced.
+
 ---
 
 ## Step 1: Open the editor
